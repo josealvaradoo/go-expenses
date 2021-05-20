@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        APP_ENV: '${APP_ENV}'
+    ports:
+      - '${PORT:-8000}:8000'
+    environment: 
+      APP_ENV: '${APP_ENV}'
+      DB_NAME: '${DB_NAME}'
+      DB_USER: '${DB_USER}'
+      DB_PASS: '${DB_PASS}'
+      DB_PORT: '${DB_PORT}'
+    volumes:
+      - .:/home/app
+    depends_on:
+      - postgres
+    restart: on-failure:10
+    networks:
+      - expenses
+  postgres:
+    image: postgres:12.6-alpine
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    volumes:
+      - ./.data/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: '${DB_NAME}'
+      POSTGRES_USER: '${DB_USER}'
+      POSTGRES_PASSWORD: '${DB_PASS}'
+    restart: always
+    networks:
+      - expenses
+
+networks:
+  expenses:
+    driver: bridge
